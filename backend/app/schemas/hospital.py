@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class MaintenanceFlagsRead(BaseModel):
     hospital_id: int
@@ -7,9 +7,20 @@ class MaintenanceFlagsRead(BaseModel):
     maintenance_equipment: int
     maintenance_percentage: float
 
-class HospitalRead(BaseModel):
-    id: int
+class HospitalBase(BaseModel):
     name: str
     location_region: str
     capacity: int
     supervisor_id: int
+
+class HospitalRead(HospitalBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True)
+
+class HospitalUpdate(BaseModel):
+    capacity: int
+
+class HospitalCreate(HospitalBase):
+    pass
+
+

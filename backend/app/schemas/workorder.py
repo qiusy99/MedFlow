@@ -9,18 +9,22 @@ class DiscrepancyRead(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-class WorkOrderRead(BaseModel):
-    id: int
+class WorkOrderBase(BaseModel):
     title: str
     priority: WorkOrderPriority
     status: WorkOrderStatus = WorkOrderStatus.PENDING
     equipment_id: int
     technician_id: int
 
+class WorkOrderRead(WorkOrderBase):
+    id: int
     model_config = ConfigDict(from_attributes=True)
 
 class WorkOrderStatusUpdate(BaseModel):
     status: WorkOrderStatus
+
+class WorkOrderCreate(WorkOrderBase):
+    pass
 
 class ReliabilityMetricsRead(BaseModel):
     device_model: str

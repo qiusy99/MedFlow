@@ -7,11 +7,17 @@ class UserBase(BaseModel):
 
 class UserRead(BaseModel):
     id: int
-
+    is_active: bool
     model_config = ConfigDict(from_attributes=True)
 
 class UserCreate(BaseModel):
-    hashed_password: str = Field(min_length=5, max_length=50)
+    password: str
+    # hashed_password: str = Field(min_length=5, max_length=50)
+
+class UserUpdate(BaseModel):
+    # role: UserRole | None = None
+    is_active: bool | None = None
+
 
 class Token(BaseModel):
     access_token: str
