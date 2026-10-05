@@ -34,7 +34,7 @@ function MaintenanceFlags() {
         <Grid container spacing={2}>
             {flags.map((flag) => (
                 <Grid key={flag.hospital_id}>
-                    <Card variant="outlined" sx={{ width: 280 }}>
+                    <Card variant="outlined" sx={{ width: 280, height: 160 }}>
                         <CardContent>
                             <Typography variant="h6">
                                 {flag.hospital_name}

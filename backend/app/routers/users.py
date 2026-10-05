@@ -32,6 +32,7 @@ async def update_user(
             detail=f"User {user_id} not found"
         )
     user.is_active = payload.is_active
+    user.role = payload.role
     await db.commit()
     await db.refresh(user)
     return user

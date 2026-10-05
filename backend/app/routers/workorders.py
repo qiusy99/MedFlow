@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import WorkOrder, Technician, Equipment
 from app.models.enums import WorkOrderStatus, WorkOrderPriority
 from app.dependencies import get_db, require_role
-from app.schemas.workorder import DiscrepancyRead, WorkOrderRead, WorkOrderStatusUpdate, ReliabilityMetricsRead, WorkOrderCreate
+from app.schemas.workorder import DiscrepancyRead, WorkOrderRead, WorkOrderStatusUpdate, WorkOrderPriorityUpdate ,ReliabilityMetricsRead, WorkOrderCreate
 from app.models.user import User, UserRole
 
 router = APIRouter(prefix="/workorders", tags=["Work Orders"])
@@ -47,12 +47,30 @@ async def workorder_status_update(
     )),
 ) -> WorkOrder:
     workorder = await db.get(WorkOrder, work_order_id)
-    if work_order_id is None:
+    if workorder is None:
         raise HTTPException(
             status_code=404,
             detail=(f"WorkOrder {work_order_id} not found")
         )
     workorder.status = payload.status
+    await db.commit()
+    await db.refresh(workorder)
+    return workorder
+
+@router.patch("/{work_order_id}/priority", response_model=WorkOrderRead)
+async def workorder_priority_update(
+    work_order_id: int,
+    payload: WorkOrderPriorityUpdate,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(require_role(UserRole.CLINICAL_ADMIN)),
+) -> WorkOrder:
+    workorder = await db.get(WorkOrder, work_order_id)
+    if workorder is None:
+        raise HTTPException(
+            status_code=404,
+            detail=(f"WorkOrder {work_order_id} not found")
+        )
+    workorder.priority = payload.priority
     await db.commit()
     await db.refresh(workorder)
     return workorder
@@ -69,8 +87,8 @@ async def delete_workorder(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Work Order {work_order_id} not found"
         )
-    db.delete(workorder)
-    db.commit()
+    await db.delete(workorder)
+    await db.commit()
 
 
 @router.get("/discrepancies", response_model=list[DiscrepancyRead])

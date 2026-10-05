@@ -3,6 +3,9 @@ import {DataGrid} from '@mui/x-data-grid';
 import {Alert, Box, CircularProgress, Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Stack, TextField} from '@mui/material'
 import apiClient from '../../api/client.js';
 import { useAuth } from "../../context/AuthContext.jsx";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import DeleteIcon from "@mui/icons-material/Delete";
+import BatteryAlertIcon from "@mui/icons-material/BatteryAlert";
 
 const STATUS_OPTIONS = ['Available', 'In-Use', 'Maintenance', 'Offline']
 
@@ -21,11 +24,54 @@ function EquipmentDataGrid({ onSuccess }) {
     {field: 'id', headerName: 'ID', width: 100},
     {field: 'serial_number', headerName: 'Serial Number', width: 200},
     {field: 'model', headerName: 'Model', width: 200},
-    {field: 'status', headerName: 'Status', width: 150},
-    {field: 'charge_level', headerName: 'Charge Level', width: 150, type: 'number'},
-    {field: 'facility_id', headerName: 'Facility ID', width: 150, type: 'number'},
-    {field: 'actions', headerName: 'Actions', width: 120, renderCell: (params) => ( canEdit ? (
-            <Button onClick={() => setEditingEquipment(params.row)}>Edit</Button>): null)},
+    {field: 'status', headerName: 'Status', width: 180},
+    {field: 'charge_level', headerName: 'Charge Level', width: 190, align: 'left', headerAlign: 'left', type: 'number',
+        renderCell: (params) => {
+            const isLowCharge = params.value < 20;
+
+            return (
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        height: '100%'
+                    }}
+                >
+                    <span>{params.value}</span>
+
+                    {isLowCharge && (
+                        <BatteryAlertIcon
+                            fontSize="small"
+                            color="warning"
+                        />
+                    )}
+                </Box>
+            );
+        }
+    },
+    {field: 'facility_id', headerName: 'Facility ID', width: 150, align: 'left', headerAlign: 'left', type: 'number'},
+    {field: 'actions', headerName: '', width: 230, sortable: false, filterable: false, headerClassName: 'action-header',
+        renderCell: (params) => (
+            isAdmin ? (
+                <Box
+                    sx={{display: 'flex', alignItems: 'center', gap: 1, height: '100%'}}
+                >
+                    <Button
+                        variant='outlined' size='small' startIcon={<EditOutlinedIcon/>}
+                        onClick={() => setEditingEquipment(params.row)}
+                    >
+                        Edit
+                    </Button>
+
+                    <Button variant='outlined' color='error' size='small' startIcon={<DeleteIcon/>} onClick={() => handleDelete(params.row)}
+                    >
+                        Delete
+                    </Button>
+                </Box>
+            ): null
+        )
+    },
 ];
     const [formValues, setFormValues] = useState({
         serial_number: '',
@@ -88,6 +134,25 @@ function EquipmentDataGrid({ onSuccess }) {
         }
     };
 
+    const handleDelete = async (equipment) => {
+        const confirmed = window.confirm(
+            `Are you sure you want to delete ${equipment.serial_number}?`
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            await apiClient.delete(`/equipments/${equipment.id}`);
+            onSuccess(`Equipment ${equipment.serial_number} deleted.`);
+            await fetchEquipments();
+        } catch (err) {
+            console.log(err.response?.data);
+            setError("Could not delete equipment");
+        }
+    };
+
     if (loading) return <CircularProgress />
     if (error) return <Alert severity="error">{error}</Alert>
 
@@ -128,7 +193,11 @@ function EquipmentDataGrid({ onSuccess }) {
             </Dialog>
 
             <Box sx={{height: 400, width:'100%'}}>
-                <DataGrid rows={equipments} columns={columns} getRowId={(row) => row.id} />
+                <DataGrid rows={equipments} columns={columns} getRowId={(row) => row.id} sx={{
+                    '& .action-header .MuiDataGrid-columnSeparator': {
+                        display: 'none',
+                    }
+                }}/>
             </Box>
             <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
                 <DialogTitle>Add New Equipment</DialogTitle>

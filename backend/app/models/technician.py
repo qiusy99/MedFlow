@@ -13,6 +13,7 @@ class Technician(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50))
+    # user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
     facility_id: Mapped[int] = mapped_column(Integer, ForeignKey("hospitals.id"))
     supervisor_id: Mapped[int] = mapped_column(Integer)
 

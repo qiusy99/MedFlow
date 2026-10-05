@@ -5,17 +5,17 @@ class UserBase(BaseModel):
     username: str = Field(min_length=3, max_length=50)
     role: UserRole
 
-class UserRead(BaseModel):
+class UserRead(UserBase):
     id: int
     is_active: bool
     model_config = ConfigDict(from_attributes=True)
 
-class UserCreate(BaseModel):
+class UserCreate(UserBase):
     password: str
     # hashed_password: str = Field(min_length=5, max_length=50)
 
 class UserUpdate(BaseModel):
-    # role: UserRole | None = None
+    role: UserRole | None = None
     is_active: bool | None = None
 
 

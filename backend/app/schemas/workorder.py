@@ -23,6 +23,9 @@ class WorkOrderRead(WorkOrderBase):
 class WorkOrderStatusUpdate(BaseModel):
     status: WorkOrderStatus
 
+class WorkOrderPriorityUpdate(BaseModel):
+    priority: WorkOrderPriority
+
 class WorkOrderCreate(WorkOrderBase):
     pass
 
