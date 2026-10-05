@@ -7,7 +7,7 @@ from sqlalchemy import Integer, String
 
 if TYPE_CHECKING:
     from .equipment import Equipment
-    from .technician import Technician
+    from .technician import Technician 
 
 class Hospital(Base):
     __tablename__ = "hospitals"

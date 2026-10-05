@@ -21,9 +21,25 @@ function LoginForm() {
         }
     };
     return (
-        <Box sx={{display: 'flex', justifyContent: 'center', mt: 8}}>
-            <Paper component="form" onSubmit={handleSubmit} variant="outlined" sx={{p:4, width:320}}>
-                <Typography variant="h6" gutterBottom>
+        <Box sx={{
+            minHeight: "100vh",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            background: "linear-gradient(135deg, #EAF4FA 0%, #DDECF7 45%, #C8DDF2 100%)"
+        }}>
+            <Paper component="form"
+                onSubmit={handleSubmit}
+                elevation={0}
+                sx={{
+                    p: 4,
+                    width: 320,
+                    borderRadius: 3,
+                    bgcolor: "rgba(255, 255, 255, 0.92)",
+                    boxShadow: "0 10px 35px rgba(45, 80, 120, 0.15)",
+                    transform: "translateY(-50px)"
+            }}>
+                <Typography variant="h6"sx={{textAlign: "center", fontWeight: 600, mb: 2}}>
                     MedFlow Login
                 </Typography>
                 {error && <Alert severity="error" sx={{mb: 2}}>{error}</Alert>}
@@ -42,7 +58,14 @@ function LoginForm() {
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                 />
-                <Button type="submit" variant="contained" fullWidth sx={{mt: 2}}>
+                <Button type="submit" variant="contained" fullWidth 
+                sx={{
+                    mt: 2,
+                    bgcolor: "#5B8FD8",
+                    "&:hover": {
+                        bgcolor: "#4E7FC4"
+                    }
+                }}>
                     Log In
                 </Button>
             </Paper>

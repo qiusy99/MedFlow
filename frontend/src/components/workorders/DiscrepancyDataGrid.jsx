@@ -4,10 +4,10 @@ import apiClient from "../../api/client.js";
 import { Alert, Box, CircularProgress, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
 const columns = [
-    {field: 'work_order_id', headerName: 'Work Order ID', width: 130},
-    {field: 'title', headerName: 'Title', width: 200},
-    {field: 'equipment_hospital_id', headerName: 'Equipment Hospital ID', width: 170},
-    {field: 'technician_hospital_id', headerName: 'Technician Hospital ID', width: 170},
+    {field: 'work_order_id', headerName: 'Work Order ID', flex: 1, width: 130},
+    {field: 'title', headerName: 'Title', flex: 2, width: 300},
+    {field: 'equipment_hospital_id', headerName: 'Equipment Hospital ID', flex: 1.5, width: 250},
+    {field: 'technician_hospital_id', headerName: 'Technician Hospital ID', flex: 1.5, width: 250},
 ];
 
 const PRIORITY_OPTIONS = ['', 'Low', 'Medium', 'Critical'];
