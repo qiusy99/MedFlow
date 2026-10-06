@@ -5,7 +5,7 @@ class MaintenanceFlagsRead(BaseModel):
     hospital_name: str
     total_equipment: int
     maintenance_equipment: int
-    maintenance_percentage: float
+    maintenance_percentage: float 
 
 class HospitalBase(BaseModel):
     name: str

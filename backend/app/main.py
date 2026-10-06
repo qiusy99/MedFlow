@@ -1,12 +1,15 @@
 from fastapi import FastAPI
 from app.routers import equipments, hospitals, technicians, workorders, auth, reportinglines, maintenanceflags, users, servicereports
 from fastapi.middleware.cors import CORSMiddleware
+from app.config import settings
 
-app = FastAPI()
+app = FastAPI(
+    version="0.1.0"
+)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[settings.frontend_origin],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
@@ -21,3 +24,7 @@ app.include_router(servicereports.router)
 app.include_router(auth.router)
 app.include_router(reportinglines.router)
 app.include_router(maintenanceflags.router)
+
+@app.get("/health", tags=["health"])
+async def health_check() -> dict[str, str]:
+    return {"status": "ok"}
