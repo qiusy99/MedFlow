@@ -9,7 +9,10 @@ __pycache__/
 
 # Environment variables
 .env
-
+lambda-env.json
 
 # VS Code
 .vscode/
+
+# Deployment artifacts
+lambda_deployment.zip

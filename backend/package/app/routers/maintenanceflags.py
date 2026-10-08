@@ -10,7 +10,7 @@ from app.schemas.hospital import MaintenanceFlagsRead
 
 router = APIRouter(prefix="/maintenanceflag", tags=["MaintenanceFlag"])
 
-@router.get("/", response_model=list[MaintenanceFlagsRead])
+@router.get("", response_model=list[MaintenanceFlagsRead])
 async def get_maintenance_flag(db: AsyncSession = Depends(get_db)):
     total_equipments = func.count(Equipment.id)
     maintenance_equipments = func.sum(case(

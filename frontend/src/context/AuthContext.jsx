@@ -17,12 +17,24 @@ export function AuthProvider({children}) {
             headers: {'Content-Type' : 'application/x-www-form-urlencoded'},
         });
         localStorage.setItem('medflowToken', response.data.access_token);
+        localStorage.setItem('medflowRefreshToken', response.data.refresh_token); // stretch goal: refresh token
         setToken(response.data.access_token);
     }
-    const logout = () => {
-        localStorage.removeItem('medflowToken');
-        setToken(null);
+    const logout = async () => {
+        const refreshToken = localStorage.getItem('medflowRefreshToken');
+        try {
+            if (refreshToken) {
+                await apiClient.post('/auth/logout', {
+                    refresh_token: refreshToken
+                });
+            }
+        } finally {
+            localStorage.removeItem('medflowToken');
+            localStorage.removeItem('medflowRefreshToken');
+            setToken(null);
+        }
     };
+
     const value = {token, user, isAuthenticated: Boolean(token), login, logout};
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>; 
 }

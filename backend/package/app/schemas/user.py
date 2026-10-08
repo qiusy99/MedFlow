@@ -21,4 +21,12 @@ class UserUpdate(BaseModel):
 
 class Token(BaseModel):
     access_token: str
+    refresh_token: str #stretch goal: refresh token
     token_type: str = "bearer"
+
+#stretch goal: refresh token
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
+class LogoutRequest(BaseModel):
+    refresh_token: str

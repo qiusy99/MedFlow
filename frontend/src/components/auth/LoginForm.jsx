@@ -21,13 +21,16 @@ function LoginForm() {
         }
     };
     return (
-        <Box sx={{
+        <Box sx={(theme) => ({
             minHeight: "100vh",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            background: "linear-gradient(135deg, #EAF4FA 0%, #DDECF7 45%, #C8DDF2 100%)"
-        }}>
+            background:
+                theme.palette.mode === "dark"
+                    ? "linear-gradient(135deg, #121212 0%, #1A2332 45%, #243447 100%)"
+                    : "linear-gradient(135deg, #EAF4FA 0%, #DDECF7 45%, #C8DDF2 100%)"
+        })}>
             <Paper component="form"
                 onSubmit={handleSubmit}
                 elevation={0}
@@ -35,7 +38,7 @@ function LoginForm() {
                     p: 4,
                     width: 320,
                     borderRadius: 3,
-                    bgcolor: "rgba(255, 255, 255, 0.92)",
+                    bgcolor: "background.paper",
                     boxShadow: "0 10px 35px rgba(45, 80, 120, 0.15)",
                     transform: "translateY(-50px)"
             }}>

@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, File, Form, UploadFile
+from app.services.s3_service import upload_service_report
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.schemas.servicereport import ServiceReportRead, ServiceReportUpdate, ServiceReportCreate
+from app.schemas.servicereport import ServiceReportRead, ServiceReportUpdate
 from app.models.servicereport import ServiceReport
 from app.dependencies import get_db, get_current_user, require_role
 from app.models.user import UserRole, User
@@ -11,11 +12,18 @@ router = APIRouter(prefix="/servicereports", tags=["ServiceReport"])
 
 @router.post("", response_model=ServiceReportRead, status_code=status.HTTP_201_CREATED)
 async def create_servicereport(
-    payload: ServiceReportCreate,
+    work_order_id: int = Form(...),
+    file: UploadFile = File(...),
+    notes: str | None = Form(None),
     db: AsyncSession = Depends(get_db),
     _: User = Depends(require_role(UserRole.CLINICAL_ADMIN, UserRole.FIELD_TECHNICIAN))
 ) -> ServiceReport:
-    servicereport = ServiceReport(**payload.model_dump())
+    file_url = await upload_service_report(file)
+    servicereport = ServiceReport(
+        work_order_id = work_order_id,
+        file_url = file_url,
+        notes = notes
+    )
     db.add(servicereport)
     await db.commit()
     await db.refresh(servicereport)

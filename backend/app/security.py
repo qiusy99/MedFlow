@@ -1,14 +1,12 @@
-import os
+
 from datetime import datetime, timedelta, timezone
 import bcrypt
 import jwt
+from app.config import settings
+import hashlib
+import secrets
 
-SECRET_KEY = os.environ.get(
-    "SECRET_KEY",
-    "6466a3a0ccc74caabe06bfcdbf4f7c70aeca7842122f04ac4e9acba0701234d0"
-)
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_TIMES = 30
 
 def hash_password(plain_password: str) -> str:
     hashed = bcrypt.hashpw(
@@ -25,9 +23,18 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(ACCESS_TOKEN_EXPIRE_TIMES))
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=settings.access_token_expire_minutes))
     to_encode["exp"] = expire
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(to_encode, settings.secret_key, algorithm=ALGORITHM)
 
 def decode_access_token(token: str) -> dict:
-    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    return jwt.decode(token, settings.secret_key, algorithms=[ALGORITHM])
+
+# stretch goal: Refresh Tokens
+
+#真正的random token
+def create_refresh_token() -> str:
+    return secrets.token_urlsafe(48)
+#存database
+def hash_refresh_token(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()

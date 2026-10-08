@@ -1,7 +1,11 @@
-import { AppBar, Toolbar, Typography, Box, Button } from "@mui/material";
+import { AppBar, Toolbar, Typography, Box, Button, IconButton } from "@mui/material";
 import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturing";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import { useColorMode } from "../../context/ColorModeContext.jsx";
 
 function AppHeader({ username, role, onLogout }) {
+    const { mode, toggleColorMode } = useColorMode();
     return (
         <AppBar
             position="static"
@@ -42,6 +46,21 @@ function AppHeader({ username, role, onLogout }) {
                         <Typography variant="body2">
                             {username} ({role})
                         </Typography>
+
+                        <IconButton
+                            color="inherit"
+                            onClick={toggleColorMode}
+                            aria-label={
+                                mode === "dark"
+                                    ? "Switch to light mode"
+                                    : "Switch to dark mode"
+                            }
+                        >
+                            {mode === "dark"
+                                ? <LightModeIcon />
+                                : <DarkModeIcon />
+                            }
+                        </IconButton>
 
                         <Button
                             color="inherit"

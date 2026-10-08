@@ -1,9 +1,15 @@
 import pytest
 import uuid
+from datetime import datetime, timedelta, timezone
+
+from sqlalchemy import select
+
+from app.database import AsyncSessionLocal
+from app.models.refresh_token import RefreshToken
+from app.security import hash_refresh_token
 
 
 # AUTH
-
 @pytest.mark.asyncio
 async def test_login_success(client):
     response = await client.post(
@@ -13,11 +19,10 @@ async def test_login_success(client):
             "password": "Admin000"
         }
     )
-
     assert response.status_code == 200
-
     data = response.json()
     assert "access_token" in data
+    assert "refresh_token" in data
     assert data["token_type"] == "bearer"
 
 
@@ -30,8 +35,141 @@ async def test_login_wrong_password(client):
             "password": "wrongpassword"
         }
     )
-
     assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_valid_refresh_token(client):
+    # Login and receive access + refresh tokens
+    login_response = await client.post(
+        "/auth/token",
+        data={
+            "username": "admin",
+            "password": "Admin000"
+        }
+    )
+    assert login_response.status_code == 200
+    old_refresh_token = login_response.json()["refresh_token"]
+    # Use refresh token to get a new token pair
+    refresh_response = await client.post(
+        "/auth/refresh",
+        json={
+            "refresh_token": old_refresh_token
+        }
+    )
+    assert refresh_response.status_code == 200
+    data = refresh_response.json()
+    assert "access_token" in data
+    assert "refresh_token" in data
+    assert data["refresh_token"] != old_refresh_token
+    assert data["token_type"] == "bearer"
+
+
+@pytest.mark.asyncio
+async def test_reused_refresh_token(client):
+    # Login and get refresh token A
+    login_response = await client.post(
+        "/auth/token",
+        data={
+            "username": "admin",
+            "password": "Admin000"
+        }
+    )
+    refresh_token_a = login_response.json()["refresh_token"]
+    # First use of A succeeds and returns B
+    first_refresh = await client.post(
+        "/auth/refresh",
+        json={
+            "refresh_token": refresh_token_a
+        }
+    )
+    assert first_refresh.status_code == 200
+    refresh_token_b = first_refresh.json()["refresh_token"]
+    # Reusing A should fail
+    reused_response = await client.post(
+        "/auth/refresh",
+        json={
+            "refresh_token": refresh_token_a
+        }
+    )
+    assert reused_response.status_code == 401
+    # Reuse of A should revoke the entire chain,
+    # so B must also fail
+    chain_response = await client.post(
+        "/auth/refresh",
+        json={
+            "refresh_token": refresh_token_b
+        }
+    )
+    assert chain_response.status_code == 401
+
+@pytest.mark.asyncio
+async def test_expired_refresh_token(client):
+    # Login and get a valid refresh token
+    login_response = await client.post(
+        "/auth/token",
+        data={
+            "username": "admin",
+            "password": "Admin000"
+        }
+    )
+    assert login_response.status_code == 200
+    refresh_token = login_response.json()["refresh_token"]
+    token_hash = hash_refresh_token(refresh_token)
+    # Manually expire the refresh token in the database
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(
+            select(RefreshToken).where(
+                RefreshToken.token_hash == token_hash
+            )
+        )
+        stored_token = result.scalar_one()
+        stored_token.expires_at = (
+            datetime.now(timezone.utc) - timedelta(minutes=1)
+        )
+        await session.commit()
+    # An expired refresh token must be rejected
+    response = await client.post(
+        "/auth/refresh",
+        json={
+            "refresh_token": refresh_token
+        }
+    )
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_refresh_token_after_logout(client):
+    # Login and get a refresh token
+    login_response = await client.post(
+        "/auth/token",
+        data={
+            "username": "admin",
+            "password": "Admin000"
+        }
+    )
+
+    refresh_token = login_response.json()["refresh_token"]
+
+    # Logout revokes the refresh token
+    logout_response = await client.post(
+        "/auth/logout",
+        json={
+            "refresh_token": refresh_token
+        }
+    )
+
+    assert logout_response.status_code == 204
+
+    # The same refresh token can no longer be used
+    refresh_response = await client.post(
+        "/auth/refresh",
+        json={
+            "refresh_token": refresh_token
+        }
+    )
+
+    assert refresh_response.status_code == 401
 
 
 # EQUIPMENT
@@ -282,7 +420,7 @@ async def test_reporting_lines(client, admin_headers):
 @pytest.mark.asyncio
 async def test_maintenance_flags(client, auditor_headers):
     response = await client.get(
-        "/maintenanceflag/",
+        "/maintenanceflag",
         headers=auditor_headers
     )
 

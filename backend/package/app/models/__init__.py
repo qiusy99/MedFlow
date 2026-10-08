@@ -6,11 +6,13 @@ from .workorder import WorkOrder
 from .technician import Technician
 from .servicereport import ServiceReport
 from .user import UserRole, User
+from .refresh_token import RefreshToken
 
 __all__ = [
     "Base",
     "WorkOrder", "WorkOrderPriority", "WorkOrderStatus",
     "Equipment", "EquipmentStatus",
     "Hospital", "Technician", "ServiceReport",
-    "User", "UserRole"
+    "User", "UserRole",
+    "RefreshToken",
 ]

@@ -18,7 +18,7 @@ function ServiceReportDataGrid({ onSuccess }) {
     const [editingServiceReport, setEditingServiceReport] = useState(null);
     const [formValues, setFormValues] = useState({
         work_order_id: '',
-        file_url: '',
+        file_url: null,
         notes: '',
     });
     const handleFieldChange = (field) => (event) => {
@@ -72,14 +72,24 @@ function ServiceReportDataGrid({ onSuccess }) {
     }, []);
 
     const handleCreate = async() => {
+        if (!formValues.file) {
+            setError("Please select a file.");
+            return;
+        }
         try {
-            await apiClient.post('/servicereports', {
-                ...formValues,
-                work_order_id: Number(formValues.work_order_id)
-            });
+            const formData = new FormData();
+            formData.append('work_order_id', formValues.work_order_id);
+            formData.append('file', formValues.file);
+
+            if (formValues.notes) {
+                formData.append('notes', formValues.notes);
+            }
+
+            await apiClient.post('/servicereports', formData);
+            const uploadFileName = formValues.file.name;
             setDialogOpen(false)
-            setFormValues({work_order_id: '', file_url: '', notes: '', timestamp: ''});
-            onSuccess(`Service Report ${formValues.file_url} created.`);
+            setFormValues({work_order_id: '', file_url: null, notes: ''});
+            onSuccess(`Service Report ${uploadFileName} created.`);
             await fetchServiceReports();
         } catch(err) {
             console.log(err.response?.data);
@@ -155,7 +165,15 @@ function ServiceReportDataGrid({ onSuccess }) {
                 <DialogContent>
                     <Stack spacing={2} sx={{mt:1, minWidth: 300}}>
                         <TextField label="Work Order ID" type="number" value={formValues.work_order_id} onChange={handleFieldChange('work_order_id')}/>
-                        <TextField label="File URL" value={formValues.file_url} onChange={handleFieldChange('file_url')}/>
+                        <input type="file" onChange={(event) => {
+                            const selectedFile = event.target.files?.[0] || null;
+                            setFormValues((prev) => ({...prev, file: selectedFile,}));
+                        }}/>
+                        {formValues.file && (
+                            <Box>
+                                Selected file: {formValues.file.name}
+                            </Box>
+                        )}
                         <TextField label="Notes" value={formValues.notes} onChange={handleFieldChange('notes')}/>                    </Stack>
                 </DialogContent>
                 <DialogActions>

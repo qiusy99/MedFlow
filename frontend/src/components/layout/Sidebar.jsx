@@ -1,4 +1,13 @@
-import { Box, Divider, List, ListItemButton, ListItemIcon, ListItemText,Typography } from "@mui/material";
+import {
+    Box,
+    Divider,
+    List,
+    ListItemButton,
+    ListItemIcon,
+    ListItemText,
+    Typography
+} from "@mui/material";
+
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
@@ -77,38 +86,41 @@ function Sidebar({ selectedPage, onSelectPage }) {
         }
     ];
 
+    const itemStyles = {
+        mx: 1,
+        my: 0.4,
+        borderRadius: 2,
+
+        "&.Mui-selected": {
+            bgcolor: "action.selected",
+            color: "primary.main"
+        },
+
+        "&.Mui-selected:hover": {
+            bgcolor: "action.selected"
+        },
+
+        "&:hover": {
+            bgcolor: "action.hover"
+        }
+    };
+
     return (
         <Box
             sx={{
                 width: 240,
                 minHeight: "calc(100vh - 64px)",
-                borderRight: "1px solid #DDE7EA",
+                borderRight: 1,
                 borderColor: "divider",
-                bgcolor: "#F4F8F9"
-            }}>
+                bgcolor: "background.paper"
+            }}
+        >
             <List>
                 {mainItems
                     .filter((item) => !item.adminOnly || isAdmin)
                     .map((item) => (
                         <ListItemButton
-                            sx={{
-                                mx: 1,
-                                my: 0.4,
-                                borderRadius: 2,
-
-                                "&.Mui-selected": {
-                                    bgcolor: "#DCECEF",
-                                    color: "#0F4C5C"
-                                },
-
-                                "&.Mui-selected:hover": {
-                                    bgcolor: "#D3E7EB"
-                                },
-
-                                "&:hover": {
-                                    bgcolor: "#EAF2F4"
-                                }
-                            }}
+                            sx={itemStyles}
                             key={item.value}
                             selected={selectedPage === item.value}
                             onClick={() => onSelectPage(item.value)}
@@ -118,9 +130,10 @@ function Sidebar({ selectedPage, onSelectPage }) {
                                     minWidth: 38,
                                     color:
                                         selectedPage === item.value
-                                            ? "#0F4C5C"
-                                            : "#60747C"
-                                }}>
+                                            ? "primary.main"
+                                            : "text.secondary"
+                                }}
+                            >
                                 {item.icon}
                             </ListItemIcon>
 
@@ -138,7 +151,7 @@ function Sidebar({ selectedPage, onSelectPage }) {
                     px: 2.5,
                     pt: 2,
                     pb: 0.5,
-                    color: "#78909C",
+                    color: "text.secondary",
                     fontSize: "0.7rem",
                     fontWeight: 700,
                     letterSpacing: "1.2px"
@@ -150,11 +163,20 @@ function Sidebar({ selectedPage, onSelectPage }) {
             <List>
                 {analyticsItems.map((item) => (
                     <ListItemButton
+                        sx={itemStyles}
                         key={item.value}
                         selected={selectedPage === item.value}
                         onClick={() => onSelectPage(item.value)}
                     >
-                        <ListItemIcon>
+                        <ListItemIcon
+                            sx={{
+                                minWidth: 38,
+                                color:
+                                    selectedPage === item.value
+                                        ? "primary.main"
+                                        : "text.secondary"
+                            }}
+                        >
                             {item.icon}
                         </ListItemIcon>
 
