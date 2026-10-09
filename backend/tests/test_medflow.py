@@ -3,10 +3,60 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
-
-from app.database import AsyncSessionLocal
 from app.models.refresh_token import RefreshToken
 from app.security import hash_refresh_token
+from app.database import AsyncSessionLocal
+import asyncio
+
+
+# HEALTH CHECK ENDPOINTS
+# python -m pytest -k "test_health" -v
+@pytest.mark.asyncio
+async def test_health_liveness(client):
+    response = await client.get("/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+@pytest.mark.asyncio
+async def test_health_ready_success(client):
+    response = await client.get("/health/ready")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ready"}
+
+@pytest.mark.asyncio
+async def test_health_ready_database_failure(client, monkeypatch):
+    async def mock_check_database(db):
+        return "unavailable"
+    monkeypatch.setattr(
+        "app.main.check_database",
+        mock_check_database
+    )
+    response = await client.get("/health/ready")
+    assert response.status_code == 503
+    assert response.json() == {
+        "detail": "Database unavailable"
+    }
+
+@pytest.mark.asyncio
+async def test_health_detail_admin(client, admin_headers):
+    response = await client.get(
+        "/health/detail",
+        headers=admin_headers
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "ok"
+    assert data["dependencies"]["database"] == "ok"
+    assert data["dependencies"]["s3"] == "ok"
+
+
+@pytest.mark.asyncio
+async def test_health_detail_non_admin(client, auditor_headers):
+    response = await client.get(
+        "/health/detail",
+        headers=auditor_headers
+    )
+    assert response.status_code == 403
 
 
 # AUTH
