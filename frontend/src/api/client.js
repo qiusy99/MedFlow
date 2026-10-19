@@ -1,3 +1,7 @@
+// 负责管理 React Frontend 和 FastAPI Backend 之间的 HTTP Requests。
+// 它不仅负责发送 API 请求，还负责 自动添加 JWT Access Token，
+// 以及在 Access Token 过期时自动使用 Refresh Token 获取新的 Token
+
 import axios from 'axios'
 
 const apiClient = axios.create({

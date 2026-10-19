@@ -52,9 +52,11 @@ fi
 
 echo "Database connection successful."
 
+# creates database tables
 echo "Creating database tables..."
 python -m scripts.create_tables
 
+# load initial data
 echo "Seeding database..."
 python -m scripts.seed_data "$@"
 

@@ -1,7 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
-    database_url: str
-    secret_key: str
+    database_url: str = "postgresql+asyncpg://postgres:0622@127.0.0.1:5432/medflow_dev_02"
+    secret_key: str = '5ec81cb2d24ce516f2199d92bb0984f85870e0ec2db4479c85c2c21322a8f73d'
 
     access_token_expire_minutes: int = 15
     refresh_token_expire_days: int = 7

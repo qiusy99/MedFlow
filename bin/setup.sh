@@ -4,8 +4,7 @@
 
 set -euo pipefail
 
-# Resolve project paths relative to this script so setup.sh can be run
-# from any working directory.
+# resolve project paths relative to this script so setup.sh can be run from any working directory.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 BACKEND_DIR="$PROJECT_ROOT/backend"
@@ -31,7 +30,7 @@ fi
 
 echo "Prerequisites found."
 
-# Create the virtual environment only when it does not already exist.
+# create the virtual environment only when it does not already exist
 if [[ ! -d "$VENV_DIR" ]]; then
     echo "Creating Python virtual environment..."
     python -m venv "$VENV_DIR"
@@ -39,7 +38,7 @@ else
     echo "Python virtual environment already exists."
 fi
 
-# Locate the virtual environment Python executable.
+# locate the virtual environment Python executable
 if [[ -x "$VENV_DIR/Scripts/python.exe" ]]; then
     PYTHON="$VENV_DIR/Scripts/python.exe"
 elif [[ -x "$VENV_DIR/bin/python" ]]; then
@@ -49,7 +48,7 @@ else
     exit 1
 fi
 
-# Install backend dependencies.
+# install backend dependencies
 if [[ ! -f "$BACKEND_DIR/requirements.txt" ]]; then
     echo "Error: backend/requirements.txt was not found."
     exit 1
@@ -58,7 +57,7 @@ fi
 echo "Installing backend dependencies..."
 "$PYTHON" -m pip install -r "$BACKEND_DIR/requirements.txt"
 
-# Never overwrite an existing environment file.
+# never overwrite an existing environment file
 if [[ -f "$BACKEND_DIR/.env" ]]; then
     echo "Existing backend/.env preserved."
 else
@@ -66,7 +65,7 @@ else
     echo "Create backend/.env and configure the required environment variables before running the application."
 fi
 
-# Verify frontend dependency files.
+# verify frontend dependency files
 if [[ ! -f "$FRONTEND_DIR/package.json" ]]; then
     echo "Error: frontend/package.json was not found."
     exit 1
